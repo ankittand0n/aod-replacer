@@ -17,7 +17,7 @@
         android:key="target_component"
         android:title="@string/target_component_title"
         android:summary="@string/target_component_summary"
-        android:defaultValue="com.paget96.batteryguru.services.AodService"
+        android:defaultValue="com.paget96.batteryguru.aod.overlay.AODOverlayActivity"
         android:dependency="enabled" />
 
     <ListPreference
@@ -26,6 +26,6 @@
         android:summary="@string/launch_method_summary"
         android:entries="@array/launch_method_entries"
         android:entryValues="@array/launch_method_values"
-        android:defaultValue="service"
+        android:defaultValue="activity"
         android:dependency="enabled" />
 </PreferenceScreen>

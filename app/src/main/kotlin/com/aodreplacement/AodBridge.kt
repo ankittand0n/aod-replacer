@@ -24,21 +24,23 @@ object AodBridge {
 
     private fun targetComponent(): String {
         prefs.reload()
-        return prefs.getString("target_component", "com.paget96.batteryguru.services.AodService")
-            ?: "com.paget96.batteryguru.services.AodService"
+        return prefs.getString("target_component", "com.paget96.batteryguru.aod.overlay.AODOverlayActivity")
+            ?: "com.paget96.batteryguru.aod.overlay.AODOverlayActivity"
     }
 
     private fun launchMethod(): String {
         prefs.reload()
-        return prefs.getString("launch_method", "service") ?: "service"
+        return prefs.getString("launch_method", "activity") ?: "activity"
     }
 
     fun launchAod(context: Context) {
         handler.postDelayed({
+            val pkg = targetPackage()
+            val component = targetComponent()
+            val method = launchMethod()
+
+            // Try Intent-based launch first (works from SystemUI system process)
             try {
-                val pkg = targetPackage()
-                val component = targetComponent()
-                val method = launchMethod()
                 val intent = Intent().apply {
                     this.component = ComponentName(pkg, component)
                     action = "$pkg.ACTION_START_AOD"
@@ -56,33 +58,54 @@ object AodBridge {
                         MainHook.log("Started AOD service: $component")
                     }
                 }
+                return@postDelayed
             } catch (e: Exception) {
-                MainHook.log("AOD launch failed: ${e.message}")
+                MainHook.log("Intent launch failed, trying am command: ${e.message}")
+            }
+
+            // Fallback: use am command (works from system process context)
+            try {
+                val cmd = when (method) {
+                    "activity" -> "am start -n $pkg/$component"
+                    else -> "am startservice -n $pkg/$component"
+                }
+                Runtime.getRuntime().exec(arrayOf("sh", "-c", cmd))
+                MainHook.log("Launched via am command: $cmd")
+            } catch (e: Exception) {
+                MainHook.log("am command fallback also failed: ${e.message}")
             }
         }, 150)
     }
 
     fun dismissAod(context: Context) {
-        try {
-            val pkg = targetPackage()
-            val component = targetComponent()
-            val method = launchMethod()
-            val intent = Intent().apply {
-                this.component = ComponentName(pkg, component)
-                action = "$pkg.ACTION_STOP_AOD"
-            }
+        val pkg = targetPackage()
+        val component = targetComponent()
+        val method = launchMethod()
 
+        try {
             when (method) {
                 "activity" -> {
+                    // Send stop broadcast for activities
                     val broadcastIntent = Intent("$pkg.ACTION_STOP_AOD").apply {
                         setPackage(pkg)
                     }
                     context.sendBroadcast(broadcastIntent)
-                    MainHook.log("Sent stop broadcast to AOD activity package: $pkg")
+                    // Also force-stop the activity via am
+                    Runtime.getRuntime().exec(arrayOf("sh", "-c", "am force-stop $pkg"))
+                    MainHook.log("Dismissed AOD activity: $pkg")
                 }
                 else -> {
-                    context.startService(intent)
-                    MainHook.log("Sent stop to AOD service: $component")
+                    try {
+                        val intent = Intent().apply {
+                            this.component = ComponentName(pkg, component)
+                            action = "$pkg.ACTION_STOP_AOD"
+                        }
+                        context.startService(intent)
+                        MainHook.log("Sent stop to AOD service: $component")
+                    } catch (e: Exception) {
+                        Runtime.getRuntime().exec(arrayOf("sh", "-c", "am stopservice -n $pkg/$component"))
+                        MainHook.log("Stopped service via am command")
+                    }
                 }
             }
         } catch (e: Exception) {
