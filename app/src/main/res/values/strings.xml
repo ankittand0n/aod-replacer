@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AOD Replacer</string>
-    <string name="module_description">Replaces LineageOS default AOD with Battery Guru custom AOD</string>
+    <string name="module_description">Replaces system AOD with a configurable custom AOD app</string>
     <string name="enable_module">Enable AOD Replacement</string>
-    <string name="enable_module_summary">Disable system AOD and launch Battery Guru AOD on screen off</string>
+    <string name="enable_module_summary">Disable system AOD and launch custom AOD on screen off</string>
+
+    <string name="target_package_title">Target Package</string>
+    <string name="target_package_summary">Package name of AOD replacement app</string>
+    <string name="target_component_title">Target Component</string>
+    <string name="target_component_summary">Full class name of activity or service to launch</string>
+    <string name="launch_method_title">Launch Method</string>
+    <string name="launch_method_summary">Launch as service or activity</string>
+
+    <string-array name="launch_method_entries">
+        <item>Service</item>
+        <item>Activity</item>
+    </string-array>
+    <string-array name="launch_method_values">
+        <item>service</item>
+        <item>activity</item>
+    </string-array>
 
     <string-array name="xposed_scope">
         <item>com.android.systemui</item>

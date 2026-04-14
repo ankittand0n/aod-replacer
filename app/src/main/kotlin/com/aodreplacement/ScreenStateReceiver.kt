@@ -39,8 +39,8 @@ object ScreenStateReceiver {
         if (registered) return
         registered = true
 
-        if (!BatteryGuruBridge.isInstalled(context)) {
-            MainHook.log("Battery Guru not installed — screen state receiver not registered")
+        if (!AodBridge.isInstalled(context)) {
+            MainHook.log("Target AOD app not installed — screen state receiver not registered")
             return
         }
 
@@ -54,16 +54,16 @@ object ScreenStateReceiver {
             override fun onReceive(ctx: Context, intent: Intent) {
                 when (intent.action) {
                     Intent.ACTION_SCREEN_OFF -> {
-                        MainHook.log("Screen OFF → launching Battery Guru AOD")
-                        BatteryGuruBridge.launchAod(ctx)
+                        MainHook.log("Screen OFF → launching custom AOD")
+                        AodBridge.launchAod(ctx)
                     }
                     Intent.ACTION_SCREEN_ON -> {
-                        MainHook.log("Screen ON → dismissing Battery Guru AOD")
-                        BatteryGuruBridge.dismissAod(ctx)
+                        MainHook.log("Screen ON → dismissing custom AOD")
+                        AodBridge.dismissAod(ctx)
                     }
                     Intent.ACTION_USER_PRESENT -> {
-                        MainHook.log("User present → ensuring Battery Guru AOD dismissed")
-                        BatteryGuruBridge.dismissAod(ctx)
+                        MainHook.log("User present → ensuring custom AOD dismissed")
+                        AodBridge.dismissAod(ctx)
                     }
                 }
             }

@@ -5,4 +5,27 @@
         android:title="@string/enable_module"
         android:summary="@string/enable_module_summary"
         android:defaultValue="true" />
+
+    <EditTextPreference
+        android:key="target_package"
+        android:title="@string/target_package_title"
+        android:summary="@string/target_package_summary"
+        android:defaultValue="com.paget96.batteryguru"
+        android:dependency="enabled" />
+
+    <EditTextPreference
+        android:key="target_component"
+        android:title="@string/target_component_title"
+        android:summary="@string/target_component_summary"
+        android:defaultValue="com.paget96.batteryguru.services.AodService"
+        android:dependency="enabled" />
+
+    <ListPreference
+        android:key="launch_method"
+        android:title="@string/launch_method_title"
+        android:summary="@string/launch_method_summary"
+        android:entries="@array/launch_method_entries"
+        android:entryValues="@array/launch_method_values"
+        android:defaultValue="service"
+        android:dependency="enabled" />
 </PreferenceScreen>
